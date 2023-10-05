@@ -56,7 +56,6 @@ def run(cyto_job, parameters):
     id_project = parameters.cytomine_id_project
     id_user = parameters.cytomine_id_user
     id_term = parameters.cytomine_id_term
-    area_th = parameters.area_threshold
     th_remove=parameters.th_remove # percentage of pixels having white/light area to be removed                
     print("Percentage of pixels having white/light area to be removed :", th_remove)
     hist_bins=parameters.hist_bins
