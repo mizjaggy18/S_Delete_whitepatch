@@ -1,0 +1,115 @@
+{
+  "name": "Delete_whitepatch",
+  "description": "To delete white patches exceeding percentage of white pixel threshold value",
+  "container-image": {
+    "image": "mizjaggy18/s_delete_whitepatch",
+    "type": "singularity"
+  },
+  "command-line": "echo [CYTOMINE_HOST] [CYTOMINE_PUBLIC_KEY] [CYTOMINE_PRIVATE_KEY] [CYTOMINE_ID_PROJECT] [CYTOMINE_ID_SOFTWARE] [CYTOMINE_ID_IMAGES] [CYTOMINE_ID_TERM] [TH_REMOVE] [HIST_BINS] [CYTOMINE_ID_USER]",
+  "inputs": [
+    {
+      "id": "cytomine_host",
+      "value-key": "[@ID]",
+      "command-line-flag": "--@id",
+      "name": "Cytomine host",
+      "set-by-server": true,
+      "optional": false,
+      "type": "String"
+    },
+    {
+      "id": "cytomine_public_key",
+      "value-key": "[@ID]",
+      "command-line-flag": "--@id",
+      "name": "Cytomine public key",
+      "set-by-server": true,
+      "optional": false,
+      "type": "String"
+    },
+    {  
+      "id": "cytomine_private_key",
+      "value-key": "[@ID]",
+      "command-line-flag": "--@id",
+      "name": "Cytomine private key",
+      "set-by-server": true,
+      "optional": false,
+      "type": "String"
+    },
+    {
+      "id": "cytomine_id_project",
+      "value-key": "[@ID]",
+      "command-line-flag": "--@id",
+      "name": "Cytomine project ID",
+      "set-by-server": true,
+      "optional": false,
+      "type": "Number"
+    },
+    {
+      "id": "cytomine_id_software",
+      "value-key": "[@ID]",
+      "command-line-flag": "--@id",
+      "name": "Cytomine software ID",
+      "set-by-server": true,
+      "optional": false,
+      "type": "Number"
+    },
+    {
+      "id": "cytomine_id_images",
+      "value-key": "[@ID]",
+      "command-line-flag": "--@id",
+      "name": "Cytomine Image IDs",
+      "description": "Images on which to classify objects",
+      "optional": false,
+      "type": "ListDomain",
+      "uri": "/api/project/$currentProject$/imageinstance.json",
+      "uri-print-attribute": "instanceFilename",
+      "uri-sort-attribute": "created"
+    },
+    {
+      "id": "cytomine_id_term",
+      "value-key": "[@ID]",
+      "command-line-flag": "--@id",
+      "name": "Cytomine term ID",
+      "description": "Ontology term ID for patches to be deleted if smaller than area threshold value",
+      "optional": false,
+      "type": "Domain",
+      "uri": "/api/ontology/$currentOntology$/term.json",
+      "uri-print-attribute": "name",
+      "uri-sort-attribute": "name"
+    },
+    {
+      "id": "th_remove",
+      "value-key": "[@ID]",
+      "command-line-flag": "--@id",
+      "name": "Percentage of white pixel",
+      "description": "The threshold value for percentage of white pixels to be deleted (0 to 1)",
+      "optional": false,
+      "type": "Number",
+      "default-value": .7
+    },     
+    {
+      "id": "hist_bins",
+      "value-key": "[@ID]",
+      "command-line-flag": "--@id",
+      "name": "Number of histogram bins",
+      "description": "Histogram bins for pixels in patches. White pixels are located in the last bin.",
+      "optional": false,
+      "type": "Number",
+      "default-value": 16
+    }, 
+    {
+      "id": "cytomine_id_user",
+      "value-key": "[@ID]",
+      "command-line-flag": "--@id",
+      "name": "Cytomine User ID",
+      "description": "Annotations from specific user",
+      "set-by-server": false,
+      "optional": true,      
+      "type": "ListDomain",
+      "uri": "/api/project/$currentProject$/user.json",
+      "uri-sort-attribute": "username",
+      "uri-print-attribute": "username"
+    }    
+  ],
+
+  "schema-version": "cytomine-0.1"
+}
