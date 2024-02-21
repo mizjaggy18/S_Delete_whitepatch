@@ -94,7 +94,7 @@
       "description": "Resize ratio to reduce computational time for large block",
       "optional": true,
       "type": "Number",
-      "default-value": .1
+      "default-value": 0.1
     },     
     {
       "id": "hist_bins",
