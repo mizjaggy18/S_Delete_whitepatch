@@ -34,7 +34,7 @@ def contains_white_patches(image, hist_bins, th_remove):
     total_pixels = image.size
     hist, _ = np.histogram(image.ravel(), hist_bins, [0, 256])
     white_patch_th = math.floor(total_pixels * th_remove)
-    return hist[255] > white_patch_th
+    return hist[hist_bins-1] > white_patch_th
 
 
 def run(cyto_job, parameters):
