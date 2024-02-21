@@ -20,6 +20,7 @@ import cv2
 
 from shapely.wkt import loads as wkt_loads
 from glob import glob
+from multiprocessing import Pool
 
 import cytomine
 from cytomine import Cytomine, CytomineJob
@@ -36,6 +37,30 @@ def contains_white_patches(image, hist_bins, th_remove):
     white_patch_th = math.floor(total_pixels * th_remove)
     return hist[hist_bins-1] > white_patch_th
 
+# Process a single ROI
+def process_roi(roi):
+    try:
+        roi_geometry = wkt_loads(roi.location)
+        roi_path = os.path.join(working_path, str(roi.project), str(roi.image))
+        roi_png_filename = os.path.join(roi_path, str(roi.id) + '.png')
+        roi.dump(dest_pattern=roi_png_filename)
+        image = cv2.imread(roi_png_filename, 0)                
+        width = int(image.shape[1] * resize_ratio / 100)
+        height = int(image.shape[0] * resize_ratio / 100)
+        dim = (width, height)                  
+        # resize image
+        image = cv2.resize(image, dim, interpolation = cv2.INTER_AREA)   
+        # Check for white patches
+        if contains_white_patches(image, hist_bins, th_remove):
+            print("White patch deleted")
+            roi.delete()  # Delete ROI if it contains white patches
+            
+    except Exception as e:
+        print(f"Error processing ROI {roi.id}: {e}")
+
+def batch_process_rois(roi_annotations):
+    with Pool() as pool:
+        pool.map(process_roi, roi_annotations)
 
 def run(cyto_job, parameters):
     logging.info("----- Delete White Patches v%s -----", __version__)
@@ -104,22 +129,24 @@ def run(cyto_job, parameters):
 
             job.update(status=Job.RUNNING, progress=40, statusComment="Processing patches...")
             print("----------------------------Patches Annotations------------------------------")            
+
+            batch_process_rois(roi_annotations)
             
-            for i, roi in enumerate(roi_annotations):
-                roi_geometry = wkt_loads(roi.location)
-                roi_path = os.path.join(working_path, str(roi.project), str(roi.image))
-                roi_png_filename = os.path.join(roi_path, str(roi.id) + '.png')
-                roi.dump(dest_pattern=roi_png_filename)
-                image = cv2.imread(roi_png_filename, 0)                
-                width = int(image.shape[1] * resize_ratio / 100)
-                height = int(image.shape[0] * resize_ratio / 100)
-                dim = (width, height)                  
-                # resize image
-                image = cv2.resize(image, dim, interpolation = cv2.INTER_AREA)   
-                # Check for white patches
-                if contains_white_patches(image, hist_bins, th_remove):
-                    print("White patch deleted")
-                    roi.delete()  # Delete ROI if it contains white patches
+            # for i, roi in enumerate(roi_annotations):
+            #     roi_geometry = wkt_loads(roi.location)
+            #     roi_path = os.path.join(working_path, str(roi.project), str(roi.image))
+            #     roi_png_filename = os.path.join(roi_path, str(roi.id) + '.png')
+            #     roi.dump(dest_pattern=roi_png_filename)
+            #     image = cv2.imread(roi_png_filename, 0)                
+            #     width = int(image.shape[1] * resize_ratio / 100)
+            #     height = int(image.shape[0] * resize_ratio / 100)
+            #     dim = (width, height)                  
+            #     # resize image
+            #     image = cv2.resize(image, dim, interpolation = cv2.INTER_AREA)   
+            #     # Check for white patches
+            #     if contains_white_patches(image, hist_bins, th_remove):
+            #         print("White patch deleted")
+            #         roi.delete()  # Delete ROI if it contains white patches
                     
                               
     finally:
