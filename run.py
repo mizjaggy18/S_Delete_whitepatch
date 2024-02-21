@@ -18,6 +18,7 @@ import geopandas
 import math
 import cv2
 
+from shapely.wkt import loads as wkt_loads
 from glob import glob
 
 import cytomine
@@ -28,6 +29,12 @@ from cytomine.models import Property, Annotation, AnnotationTerm, AnnotationColl
 __author__ = "WSH Munirah W Ahmad <wshmunirah@gmail.com>"
 __version__ = "0.0.2"
 # Date created: 5 Oct 2023
+# Function to check if ROI contains white patches
+def contains_white_patches(image, th_remove):
+    total_pixels = image.size
+    hist, _ = np.histogram(image.ravel(), 256, [0, 256])
+    white_patch_th = math.floor(total_pixels * th_remove)
+    return hist[255] > white_patch_th
 
 
 def run(cyto_job, parameters):
@@ -95,27 +102,26 @@ def run(cyto_job, parameters):
             print(roi_annotations)
 
             job.update(status=Job.RUNNING, progress=40, statusComment="Processing patches...")
-            print("----------------------------Patches Annotations------------------------------")
+            print("----------------------------Patches Annotations------------------------------")            
+            
             for i, roi in enumerate(roi_annotations):
-                #Get Cytomine ROI coordinates for remapping to whole-slide
-                #Cytomine cartesian coordinate system, (0,0) is bottom left corner
-                
-                roi_geometry = wkt.loads(roi.location)
-                #Dump ROI image into local PNG file
-                roi_path=os.path.join(working_path,str(roi_annotations.project)+'/'+str(roi_annotations.image)+'/')
-                roi_png_filename=os.path.join(roi_path+str(roi.id)+'.png')
-                roi.dump(dest_pattern=roi_png_filename)                    
-                
-                # check white patches
-                J = cv2.imread(roi_png_filename,0) #read image and convert to grayscale    
-                [r, c]=J.shape
-                totalpixels=r*c
-                white_patch_th = math.floor(totalpixels * th_remove) # white pixels threshold value
-                hist,bins = np.histogram(J.ravel(),hist_bins,[0,256])
-                
-                if hist[hist_bins-1] > white_patch_th: # check the last bin, if exceeds white pixels threshold value, delete patch
-                    print("White patch deleted: ", hist[hist_bins-1])
-                    roi.delete() #delete splitpoly annotation to avoid double annotations, we want to keep only the classified annotations
+                roi_geometry = wkt_loads(roi.location)
+                roi_path = os.path.join(working_path, str(roi.project), str(roi.image))
+                roi_png_filename = os.path.join(roi_path, str(roi.id) + '.png')
+                roi.dump(dest_pattern=roi_png_filename)
+                image = cv2.imread(roi_png_filename, 0)
+                scale_percent = 60 # percent of original size
+                width = int(image.shape[1] * scale_percent / 100)
+                height = int(image.shape[0] * scale_percent / 100)
+                dim = (width, height)                  
+                # resize image
+                resized = cv2.resize(image, dim, interpolation = cv2.INTER_AREA) 
+                image = cv2.resize(image, (new_width, new_height))                 
+                # Check for white patches
+                if contains_white_patches(image, th_remove):
+                    print("White patch deleted")
+                    roi.delete()  # Delete ROI if it contains white patches
+                    
                               
     finally:
         job.update(progress=100, statusComment="Run complete.")
