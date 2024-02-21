@@ -66,6 +66,7 @@ def run(cyto_job, parameters):
     th_remove=parameters.th_remove # percentage of pixels having white/light area to be removed                
     print("Percentage of pixels having white/light area to be removed :", th_remove)
     hist_bins=parameters.hist_bins
+    resize_ratio=parameters.resize_ratio
     
     working_path = os.path.join("tmp", str(job.id))
     
@@ -109,10 +110,9 @@ def run(cyto_job, parameters):
                 roi_path = os.path.join(working_path, str(roi.project), str(roi.image))
                 roi_png_filename = os.path.join(roi_path, str(roi.id) + '.png')
                 roi.dump(dest_pattern=roi_png_filename)
-                image = cv2.imread(roi_png_filename, 0)
-                scale_percent = 60 # percent of original size
-                width = int(image.shape[1] * scale_percent / 100)
-                height = int(image.shape[0] * scale_percent / 100)
+                image = cv2.imread(roi_png_filename, 0)                
+                width = int(image.shape[1] * resize_ratio / 100)
+                height = int(image.shape[0] * resize_ratio / 100)
                 dim = (width, height)                  
                 # resize image
                 image = cv2.resize(image, dim, interpolation = cv2.INTER_AREA)   
