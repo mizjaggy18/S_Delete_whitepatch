@@ -30,9 +30,9 @@ __author__ = "WSH Munirah W Ahmad <wshmunirah@gmail.com>"
 __version__ = "0.0.2"
 # Date created: 5 Oct 2023
 # Function to check if ROI contains white patches
-def contains_white_patches(image, th_remove):
+def contains_white_patches(image, hist_bins, th_remove):
     total_pixels = image.size
-    hist, _ = np.histogram(image.ravel(), 256, [0, 256])
+    hist, _ = np.histogram(image.ravel(), hist_bins, [0, 256])
     white_patch_th = math.floor(total_pixels * th_remove)
     return hist[255] > white_patch_th
 
@@ -117,7 +117,7 @@ def run(cyto_job, parameters):
                 # resize image
                 image = cv2.resize(image, dim, interpolation = cv2.INTER_AREA)   
                 # Check for white patches
-                if contains_white_patches(image, th_remove):
+                if contains_white_patches(image, hist_bins, th_remove):
                     print("White patch deleted")
                     roi.delete()  # Delete ROI if it contains white patches
                     
