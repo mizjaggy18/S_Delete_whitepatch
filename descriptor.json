@@ -5,7 +5,7 @@
     "image": "mizjaggy18/s_delete_whitepatch",
     "type": "singularity"
   },
-  "command-line": "echo [CYTOMINE_HOST] [CYTOMINE_PUBLIC_KEY] [CYTOMINE_PRIVATE_KEY] [CYTOMINE_ID_PROJECT] [CYTOMINE_ID_SOFTWARE] [CYTOMINE_ID_IMAGES] [CYTOMINE_ID_TERM] [TH_REMOVE] [HIST_BINS] [CYTOMINE_ID_USER]",
+  "command-line": "echo [CYTOMINE_HOST] [CYTOMINE_PUBLIC_KEY] [CYTOMINE_PRIVATE_KEY] [CYTOMINE_ID_PROJECT] [CYTOMINE_ID_SOFTWARE] [CYTOMINE_ID_IMAGES] [CYTOMINE_ID_TERM] [TH_REMOVE] [RESIZE_RATIO] [HIST_BINS] [CYTOMINE_ID_USER]",
   "inputs": [
     {
       "id": "cytomine_host",
@@ -85,6 +85,16 @@
       "optional": false,
       "type": "Number",
       "default-value": 0.7
+    },
+    {
+      "id": "resize_ratio",
+      "value-key": "[@ID]",
+      "command-line-flag": "--@id",
+      "name": "Resize ratio (0 to 1)",
+      "description": "Resize ratio to reduce computational time for large block",
+      "optional": true,
+      "type": "Number",
+      "default-value": .1
     },     
     {
       "id": "hist_bins",
