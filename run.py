@@ -38,7 +38,7 @@ def contains_white_patches(image, hist_bins, th_remove):
     return hist[hist_bins-1] > white_patch_th
 
 # Process a single ROI
-def process_roi(roi):
+def process_roi(roi,working_path,resize_ratio,hist_bins,th_remove):
     try:
         roi_geometry = wkt_loads(roi.location)
         roi_path = os.path.join(working_path, str(roi.project), str(roi.image))
@@ -58,9 +58,9 @@ def process_roi(roi):
     except Exception as e:
         print(f"Error processing ROI {roi.id}: {e}")
 
-def batch_process_rois(roi_annotations):
+def batch_process_rois(roi_annotations,working_path, resize_ratio, hist_bins, th_remove):
     with Pool() as pool:
-        pool.map(process_roi, roi_annotations)
+        pool.starmap(process_roi, [(roi, working_path, resize_ratio, hist_bins, th_remove) for roi in roi_annotations])
 
 def run(cyto_job, parameters):
     logging.info("----- Delete White Patches v%s -----", __version__)
@@ -130,7 +130,7 @@ def run(cyto_job, parameters):
             job.update(status=Job.RUNNING, progress=40, statusComment="Processing patches...")
             print("----------------------------Patches Annotations------------------------------")            
 
-            batch_process_rois(roi_annotations)
+            batch_process_rois(roi_annotations,working_path, resize_ratio, hist_bins, th_remove)
             
             # for i, roi in enumerate(roi_annotations):
             #     roi_geometry = wkt_loads(roi.location)
