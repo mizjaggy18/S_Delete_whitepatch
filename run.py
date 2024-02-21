@@ -115,8 +115,7 @@ def run(cyto_job, parameters):
                 height = int(image.shape[0] * scale_percent / 100)
                 dim = (width, height)                  
                 # resize image
-                resized = cv2.resize(image, dim, interpolation = cv2.INTER_AREA) 
-                image = cv2.resize(image, (new_width, new_height))                 
+                image = cv2.resize(image, dim, interpolation = cv2.INTER_AREA)   
                 # Check for white patches
                 if contains_white_patches(image, th_remove):
                     print("White patch deleted")
